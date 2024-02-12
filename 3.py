@@ -3,7 +3,6 @@ def binary_search(arr, x):
 
     while l <= r:
         pivot = (l + r) // 2
-        print(pivot)
         if arr[pivot] == x:
             return pivot
         elif arr[pivot] > x:

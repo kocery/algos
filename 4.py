@@ -1,55 +1,50 @@
-import shutil
 import subprocess
-import tempfile
-
-from git import Repo
 import os
+import argparse
+
+from git import Repo, BadName
 
 
 def bisect(path_to_repo, start_hash, end_hash, command):
     check_path_to_repo(path_to_repo)
-    check_hash(start_hash)
-    check_hash(end_hash)
-    check_command(command)
+    os.chdir(path_to_repo)
+    repo = Repo("D:\\PyCharmProjects\\test_for_bisect")
 
-    # Инициализация
+    check_hash(start_hash, repo)
+    check_hash(end_hash, repo)
 
-    temp_dir = create_temp_dir()
-    repo = clone_repo(path_to_repo, temp_dir)
+    commits = get_previous_commits(path_to_repo, end_hash)
 
-    # Поиск
+    last_bug = str()
 
-    while start_hash != end_hash:
-        middle_hash = get_middle_hash(start_hash, end_hash)
+    l, r = 0, len(commits) - 1
 
-        # repo reset(middle_hash, hard=True)
-        # https://gitpython.readthedocs.io/en/stable/reference.html?highlight=reset#module-git.refs.head
-
-        if check_command_with_error_code(command):
-            end_hash = middle_hash
+    while l + 1 != r:
+        pivot = (l + r) // 2
+        repo.git.reset(commits[pivot])
+        repo.git.checkout('.')
+        if exec_command(command):
+            l = pivot
         else:
-            start_hash = middle_hash
+            r = pivot
+            last_bug = commits[pivot]
 
-    # Вывод
+    repo.git.reset(end_hash)
+    repo.git.checkout('.')
 
-    print(start_hash)
-    delete_temp_dir(temp_dir)
-
-    # return start_hash
-
-
-def create_temp_dir():
-    temp_dir = tempfile.mkdtemp()
-    return temp_dir
+    return last_bug
 
 
-def delete_temp_dir(temp_dir):
-    shutil.rmtree(temp_dir, ignore_errors=True)
+def get_previous_commits(repo_path, commit_hash):
+    repo = Repo(repo_path)
+    commit = repo.commit(commit_hash)
 
+    previous_commits_hashes = [commit.hexsha]
+    while commit.parents:
+        commit = commit.parents[0]
+        previous_commits_hashes.append(commit.hexsha)
 
-def get_middle_hash(start_hash, end_hash):
-    ## middle_hash
-    return middle_hash
+    return previous_commits_hashes[::-1]
 
 
 def check_path_to_repo(path_to_repo):
@@ -62,30 +57,28 @@ def check_path_to_repo(path_to_repo):
     return True
 
 
-def check_command(command):
-    if not os.path.isfile(command):
-        raise ValueError(f"{command} is not an executable file")
-
-    if not os.access(command, os.X_OK):
-        raise ValueError(f"{command} is not executable")
-
-    return True
-
-
-def check_hash(hash):
-    if not len(hash) == 40:
-        raise ValueError(f"{hash} is not a valid commit hash")
-    return True
-
-
-def check_command_with_error_code(command):
+def check_hash(hash, repo):
     try:
-        subprocess.check_call(command, shell=True)
-        return False
-    except subprocess.CalledProcessError:
+        commit = repo.commit(hash)
+    except BadName:
+        raise ValueError(f"Commit hash - {hash} is not valid")
+
+    return True
+
+
+def exec_command(command):
+    try:
+        subprocess.check_call(command, shell=True, stderr=subprocess.DEVNULL)
         return True
+    except subprocess.CalledProcessError:
+        return False
 
 
-def clone_repo(path_to_repo, temp_dir):
-    repo = Repo.clone_from(path_to_repo, temp_dir)
-    return repo
+parser = argparse.ArgumentParser()
+parser.add_argument('path_to_repo')
+parser.add_argument('start_hash')
+parser.add_argument('end_hash')
+parser.add_argument('command', nargs='+')
+args = parser.parse_args()
+
+print("First bad commit - ", bisect(args.path_to_repo, args.start_hash, args.end_hash, args.command))

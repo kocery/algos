@@ -1,27 +1,24 @@
-def rec_minus(n, m):
-    len_n, len_m = len(str(n)), len(str(m))
-    k = len_n - len_m - 1 if len_n != len_m else 0
+from random import randint
+
+
+def divide(a, b):
+    n, m = len(str(a)), len(str(b))
     c = 0
 
-    while n >= m:
-        n -= m * 10 ** k
-        c += 1
+    while a > b:
+        for i in range(n - m + 1):
+            num = 0
+            k = 10 ** (n - m - i)
+            while (num + 1) * b < a / k:
+                num += 1
+            a -= num * b * k
+            c += num * k
 
     return c
 
 
-def divide(n, m):
-    end = '0'
+test = [(randint(2 ** 50, 2 ** 100), randint(2 ** 50, 2 ** 100)) for _ in range(50)]
 
-    while n >= m:
-        len_n, len_m = len(str(n)), len(str(m))
-        k = len_n - len_m - 1 if len_n != len_m else 0
-
-        if n - m * 10 ** k > 0:
-            c = rec_minus(n, m * 10 ** k)
-            n -= m * 10 ** k * c
-            end += str(c)
-            if n < m * 10 ** (k - 1) and k != 0:
-                end += '0'
-
-    return int(end)
+for a, b in test:
+    div = divide(a, b)
+    print(a, b, a // b == div)

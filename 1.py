@@ -2,19 +2,23 @@ from random import randint
 
 
 def divide(a, b):
-    n, m = len(str(a)), len(str(b))
-    c = 0
+    if b == 0:
+        raise ValueError("Делитель не может быть равен нулю")
 
-    while a > b:
-        for i in range(n - m + 1):
-            num = 0
-            k = 10 ** (n - m - i)
-            while (num + 1) * b < a / k:
-                num += 1
-            a -= num * b * k
-            c += num * k
+    q, r = 0, 0
 
-    return c
+    for digit in str(a):
+        cur = int(digit) + r * 10
+
+        q_digit = 0
+        while cur >= b:
+            cur -= b
+            q_digit += 1
+
+        q = q * 10 + q_digit
+        r = cur
+
+    return q
 
 
 test = [(randint(2 ** 50, 2 ** 100), randint(2 ** 50, 2 ** 100)) for _ in range(50)]

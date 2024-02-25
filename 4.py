@@ -8,7 +8,7 @@ from git import Repo, BadName
 def bisect(path_to_repo, start_hash, end_hash, command):
     check_path_to_repo(path_to_repo)
     os.chdir(path_to_repo)
-    repo = Repo("D:\\PyCharmProjects\\test_for_bisect")
+    repo = Repo(path_to_repo)
 
     check_hash(start_hash, repo)
     check_hash(end_hash, repo)

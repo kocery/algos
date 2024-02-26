@@ -4,7 +4,6 @@ import unittest
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 
 
 def add_matrix(A, B):
@@ -115,7 +114,7 @@ class MatrixMultiplicationTest(unittest.TestCase):
             strassen_matr_mult
         ]
 
-        matrix_sizes = [2 ** i for i in range(2, 10)]  # Adjust the range as needed
+        matrix_sizes = [2 ** i for i in range(2, 10)]
 
         results = {algorithm.__name__: {'mean_times': [], 'std_deviations': [], 'geometric_means': []}
                    for algorithm in algorithms}

@@ -1,3 +1,6 @@
+import heapq
+
+
 def precedence(operator):
     if operator in {'+', '-'}:
         return 1
@@ -32,11 +35,12 @@ def infix_to_postfix(expression):
 
 
 def test_infix_to_postfix():
-    infix_expression = "3 + 4 * ( 2 - 1 ) / ( 5 - 2 )"
-    expected_postfix = ["3", "4", "2", "1", "-", "*", "5", "2", "-", "/", "+"]
+    infix_expression = "1 - 5 ^ 3 * 2"
+    expected_postfix = ["1", "5", "3", "^", "2", "*", "-"]
     result = infix_to_postfix(infix_expression.split())
     assert result == expected_postfix, f"Expected: {expected_postfix}, but got: {result}"
 
 
 if __name__ == "__main__":
     test_infix_to_postfix()
+heapq.heappush()

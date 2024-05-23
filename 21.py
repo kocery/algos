@@ -34,12 +34,18 @@ class BasicNode:
             to.extend([None] * (len(frm) - len(to)))
         carry = None
         for i, (f, t) in enumerate(zip(frm, to)):
-            if f and t:
+            if f and t and carry:
                 to[i] = carry
                 carry = self._merge_nodes(t, f)
-            elif carry and ((e := f) or (e := t)):
+            elif f and t:
+                carry = self._merge_nodes(t, f)
                 to[i] = None
-                carry = self._merge_nodes(carry, e)
+            elif f and carry:
+                carry = self._merge_nodes(f, carry)
+                to[i] = None
+            elif t and carry:
+                carry = self._merge_nodes(t, carry)
+                to[i] = None
             elif carry:
                 to[i] = carry
                 carry = None
@@ -128,6 +134,6 @@ x = set([randint(0, 50) for _ in range(13)])
 print(x)
 for i in x:
     b.insert(i, 0)
-print(b)
-print(b.extract_min())
-print(b.extract_min())
+print(sorted(x))
+for x in range(len(x)):
+    print(b.extract_min())

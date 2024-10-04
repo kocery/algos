@@ -5,7 +5,7 @@ import random
 class BloomFilter:
     def __init__(self, n, p):
         self.size = math.ceil(-n * math.log(p) / math.log(2) ** 2)
-        self.bits = [0] * self.size
+        self.bitset = 0
         self.num_hashes = self._calculate_num_hashes(n)
         self.hash_funcs = [self._create_hash_func() for _ in range(self.num_hashes)]
 
@@ -20,12 +20,15 @@ class BloomFilter:
     def add(self, ip):
         for hash_func in self.hash_funcs:
             index = hash_func(int(ip.replace('.', '')))
-            self.bits[index] = 1
+            newbit = 1 << index
+            self.bitset |= newbit
 
     def __contains__(self, ip):
         for hash_func in self.hash_funcs:
             index = hash_func(int(ip.replace('.', '')))
-            if self.bits[index] == 0:
+            newbit = 1 << index
+
+            if not self.bitset & newbit:
                 return False
         return True
 
